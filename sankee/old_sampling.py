@@ -41,41 +41,11 @@ def generate_sample_data(
     seed: int = 0,
     include: None | list[int] = None,
     max_classes: None | int = None,
-    point_asset: None | str = None,
 ) -> tuple[pd.DataFrame, ee.FeatureCollection]:
     """Take a list of images extract image values to each to random points. The image values will be
     stored in a property based on the image label. Then, the samples will be returned as a formated
     dataframe with one column for each image and one row for each sample point.
     """
-    def remove_properties(feature):
-      return ee.Feature(feature.geometry())
-    import ee
-
-    def select_random_points(feature_collection, n, seed):
-        """Selects a random subset of points from a feature collection.
-        
-        Args:
-            feature_collection (ee.FeatureCollection): The input feature collection.
-            n (int): The number of random points to select (may be slightly under!)
-            seed (int): The random seed for reproducibility.
-            
-        Returns:
-            ee.FeatureCollection: A feature collection containing the selected random points.
-        """
-        # Add a random number column with the given seed
-        fc_with_random_column = feature_collection.randomColumn('random', seed)
-        
-        # Calculate the proportion to select from the feature collection
-        proportion = ee.Number(n).divide(fc_with_random_column.size())
-        
-        # Filter features based on the random numbers to select random points
-        random_points = fc_with_random_column.filter(ee.Filter.lt('random', proportion))
-        
-        # Limit the number of random points
-        limited_random_points = random_points.limit(n)
-        
-        return limited_random_points
-
 
     def extract_values_at_point(pt):
         for img, label in zip(image_list, image_labels):
@@ -86,18 +56,7 @@ def generate_sample_data(
 
         return pt
 
-    if point_asset is not None:
-      
-      raw_points = ee.FeatureCollection(point_asset).filterBounds(region)
-      
-      random_points = select_random_points(raw_points, n, seed)
-
-      points = random_points.map(remove_properties)
-
-      
-    else:
-      points = ee.FeatureCollection.randomPoints(region=region, points=n, seed=seed)
-    
+    points = ee.FeatureCollection.randomPoints(region=region, points=n, seed=seed)
     samples = points.map(extract_values_at_point)
 
     try:

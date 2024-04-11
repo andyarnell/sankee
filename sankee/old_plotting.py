@@ -33,13 +33,12 @@ def sankify(
     region: None | ee.Geometry = None,
     label_list: None | list[str] = None,
     max_classes: None | int = None,
-    n: int = 20000,
+    n: int = 500,
     title: None | str = None,
     scale: None | int = None,
     seed: int = 0,
     label_type: None | Literal["class", "percent", "count"] = "class",
     theme: str | themes.Theme = "default",
-    point_asset: None | str = None,
 ) -> SankeyPlot:
     """
     Generate an interactive Sankey plot showing land cover change over time from a series of images.
@@ -86,9 +85,6 @@ def sankify(
     theme : str or Theme
         The theme to apply to the Sankey diagram. Can be the name of a built-in theme (e.g. "d3") or
         a custom `sankee.Theme` object.
-    point_asset: str, default None
-        feature collection asset address. If present overrides random sampling and 
-        uses specific points from the collection (filtered to the region and number n).    
 
     Returns
     -------
@@ -115,7 +111,6 @@ def sankify(
         region=region,
         n=n,
         seed=seed,
-        point_asset=point_asset,
     )
 
     return SankeyPlot(
