@@ -40,6 +40,8 @@ def sankify(
     label_type: None | Literal["class", "percent", "count"] = "class",
     theme: str | themes.Theme = "default",
     point_asset: None | str = None,
+    proportion: None | int = None,
+
 ) -> SankeyPlot:
     """
     Generate an interactive Sankey plot showing land cover change over time from a series of images.
@@ -89,7 +91,8 @@ def sankify(
     point_asset: str, default None
         feature collection asset address. If present overrides random sampling and 
         uses specific points from the collection (filtered to the region and number n).    
-
+    proportion: if present, along with poiint_asset, this overrides n and selects proprotion of 
+        points randomly from the point_asset. Defaults to None.
     Returns
     -------
     SankeyPlot
@@ -116,6 +119,7 @@ def sankify(
         n=n,
         seed=seed,
         point_asset=point_asset,
+        proportion=proportion,
     )
 
     return SankeyPlot(

@@ -42,6 +42,7 @@ def generate_sample_data(
     include: None | list[int] = None,
     max_classes: None | int = None,
     point_asset: None | str = None,
+    proportion: None | int = None,
 ) -> tuple[pd.DataFrame, ee.FeatureCollection]:
     """Take a list of images extract image values to each to random points. The image values will be
     stored in a property based on the image label. Then, the samples will be returned as a formated
@@ -51,7 +52,7 @@ def generate_sample_data(
       return ee.Feature(feature.geometry())
     import ee
 
-    def select_random_points(feature_collection, n, seed):
+    def select_random_points(feature_collection, n, seed, proportion):
         """Selects a random subset of points from a feature collection.
         
         Args:
@@ -65,14 +66,17 @@ def generate_sample_data(
         # Add a random number column with the given seed
         fc_with_random_column = feature_collection.randomColumn('random', seed)
         
-        # Calculate the proportion to select from the feature collection
-        proportion = ee.Number(n).divide(fc_with_random_column.size())
+        if proportion is None:
+
+          # Calculate the proportion to select from the feature collection
+          proportion = ee.Number(n).divide(fc_with_random_column.size())
         
+
         # Filter features based on the random numbers to select random points
         random_points = fc_with_random_column.filter(ee.Filter.lt('random', proportion))
         
         # Limit the number of random points
-        limited_random_points = random_points.limit(n)
+        limited_random_points = random_points
         
         return limited_random_points
 
@@ -90,7 +94,7 @@ def generate_sample_data(
       
       raw_points = ee.FeatureCollection(point_asset).filterBounds(region)
       
-      random_points = select_random_points(raw_points, n, seed)
+      random_points = select_random_points(raw_points, n, seed, proportion)
 
       points = random_points.map(remove_properties)
 
